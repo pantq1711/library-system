@@ -27,7 +27,7 @@ function CheckInOut() {
       setMessage("Đang kiểm tra thẻ RFID...");
 
       try {
-        const response = await fetch("http://localhost:3001/api/attendance/card-scan", {
+        const response = await fetch("http://localhost:5000/api/attendance/card-scan", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ cardId: card }),
@@ -134,7 +134,7 @@ function CheckInOut() {
     setIsLoading(true); // Bật loading
   
     try {
-      const response = await fetch("http://localhost:3001/api/attendance/face-auth", {
+      const response = await fetch("http://localhost:5000/api/attendance/face-auth", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId: userInfo.id, faceImage }),

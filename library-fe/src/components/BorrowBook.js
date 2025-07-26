@@ -14,7 +14,7 @@ function BorrowBook() {
       const cardId = parsedCardData.id;
 
       try {
-        const response = await fetch("http://localhost:3001/api/loans/user-card-scan", {
+        const response = await fetch("http://localhost:5000/api/loans/user-card-scan", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -47,7 +47,7 @@ function BorrowBook() {
 
 
     //     // Gọi API gửi thông tin quét sách
-    //     const response = await fetch("http://localhost:3001/api/loans/book-scan", {
+    //     const response = await fetch("http://localhost:5000/api/loans/book-scan", {
     //       method: "POST",
     //       headers: {
     //         "Content-Type": "application/json",
@@ -95,7 +95,7 @@ function BorrowBook() {
         const bookId = parsedBookData.id;
         const userId = userCard.user.id;
   
-        const response = await fetch("http://localhost:3001/api/loans/book-scan", {
+        const response = await fetch("http://localhost:5000/api/loans/book-scan", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -136,7 +136,7 @@ function BorrowBook() {
 
   const handleCompleteBorrow = async () => {
     try {
-      const response = await fetch("http://localhost:3001/api/borrow", {
+      const response = await fetch("http://localhost:5000/api/borrow", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

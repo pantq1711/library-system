@@ -6,7 +6,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs-extra');
 const faceRecognitionService = require('../services/FaceRecognitionService');
-
+const authMiddleware = require('../middleware/authMiddleware');
 // Đảm bảo thư mục tạm tồn tại
 const TEMP_DIR = path.join(__dirname, '../temp-uploads');
 fs.ensureDirSync(TEMP_DIR);

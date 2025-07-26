@@ -44,7 +44,7 @@ initializeDatabase();
 setupSocketIO(io);
 
 // Thiết lập MQTT
-// const mqttClient = setupMQTT(io);
+const mqttClient = setupMQTT(io);
 
 // Thiết lập Socket.IO cho các controller
 attendanceController.setIo(io);
