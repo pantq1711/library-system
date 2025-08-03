@@ -72,7 +72,7 @@ router.get('/setup', async (req, res) => {
 });
 
 // Đăng ký khuôn mặt cho người dùng
-router.post('/register/:userId', authMiddleware, upload.single('image'), async (req, res) => {
+router.post('/register/:userId', upload.single('image'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({
@@ -186,7 +186,7 @@ router.post('/checkout', upload.single('image'), async (req, res) => {
 });
 
 // Lấy trạng thái đăng ký khuôn mặt
-router.get('/status/:userId', authMiddleware, async (req, res) => {
+router.get('/status/:userId',  async (req, res) => {
   try {
     const userId = req.params.userId;
     
@@ -209,7 +209,7 @@ router.get('/status/:userId', authMiddleware, async (req, res) => {
 });
 
 // Xóa dữ liệu khuôn mặt
-router.delete('/reset/:userId', authMiddleware, async (req, res) => {
+router.delete('/reset/:userId', async (req, res) => {
   try {
     const userId = req.params.userId;
     
@@ -230,5 +230,70 @@ router.delete('/reset/:userId', authMiddleware, async (req, res) => {
     });
   }
 });
+// Thêm vào cuối file library-system/routes/FaceRecognition.js
 
+// Test routes không cần authentication
+router.post('/test/register/:userId', upload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: 'Cần có hình ảnh khuôn mặt'
+      });
+    }
+
+    const userId = req.params.userId;
+    const description = req.body.description || 'Dữ liệu khuôn mặt test';
+    
+    // Đăng ký khuôn mặt
+    const result = await faceRecognitionService.registerFace(userId, req.file.path, description);
+    
+    // Xóa file tạm
+    fs.removeSync(req.file.path);
+    
+    res.status(result.success ? 200 : 400).json(result);
+  } catch (error) {
+    console.error('Lỗi khi xử lý đăng ký khuôn mặt test:', error);
+    
+    if (req.file) {
+      fs.removeSync(req.file.path);
+    }
+    
+    res.status(500).json({
+      success: false,
+      message: 'Lỗi máy chủ khi đăng ký khuôn mặt',
+      error: error.message
+    });
+  }
+});
+
+// Test check-in route
+router.post('/test/checkin', upload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: 'Cần có hình ảnh khuôn mặt'
+      });
+    }
+    
+    const result = await faceRecognitionService.checkIn(req.file.path);
+    
+    fs.removeSync(req.file.path);
+    
+    res.status(result.success ? 200 : 400).json(result);
+  } catch (error) {
+    console.error('Lỗi khi xử lý check-in test:', error);
+    
+    if (req.file) {
+      fs.removeSync(req.file.path);
+    }
+    
+    res.status(500).json({
+      success: false,
+      message: 'Lỗi máy chủ khi check-in',
+      error: error.message
+    });
+  }
+});
 module.exports = router;

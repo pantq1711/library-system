@@ -15,10 +15,10 @@ function CheckInOut() {
 
   // Xử lý sự kiện từ socket
   useEffect(() => {
-    socket.on("rfid_scanned", async (data) => {
+    socket.on("card_scanned", async (data) => {
       console.log("Received data:", data);
-      const parsedCardData = JSON.parse(data.cardId);
-      const card = parsedCardData.id;
+      const card = data.cardId;  // ← Chỉ cần lấy trực tiếp
+
       console.log("Thẻ RFID quét:", card);
       setCardId(card);
       setUserInfo(null);
@@ -59,7 +59,7 @@ function CheckInOut() {
     });
 
     return () => {
-      socket.off("rfid_scanned");
+      socket.off("card_scanned");
       socket.off("check_in_out_result");
     };
   }, []);

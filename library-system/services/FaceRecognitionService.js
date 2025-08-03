@@ -308,7 +308,7 @@ class FaceRecognitionService {
       const attendance = await Attendance.create({
         userId: matchResult.userId,
         checkinTime: new Date(),
-        status: 'present',
+        status: 'check-in',
         faceVerified: true
       });
       
