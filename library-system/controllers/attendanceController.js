@@ -36,36 +36,88 @@ exports.processCardScan = async (req, res) => {
 };
 
 // Xử lý xác thực khuôn mặt và check-in/check-out
+// THAY THẾ HOÀN TOÀN FUNCTION processFaceAuth trong attendanceController.js:
+
 exports.processFaceAuth = async (req, res) => {
+  console.log("🔥 === FACE AUTH DEBUG START ===");
+  console.log("📦 Request body:", req.body);
+  console.log("📊 Request headers:", req.headers);
+  
   try {
     const { userId, faceImage } = req.body;
     
-    // TODO: Thêm logic xác thực khuôn mặt ở đây
-    // Giả định xác thực thành công
+    console.log(`🆔 User ID: ${userId}`);
+    console.log(`🖼️ Face image exists: ${!!faceImage}`);
+    console.log(`📏 Face image type: ${typeof faceImage}`);
+    
+    if (faceImage) {
+      console.log(`📐 Face image length: ${faceImage.length}`);
+      console.log(`🔤 Face image starts with: ${faceImage.substring(0, 50)}...`);
+    }
+    
+    // Kiểm tra có ảnh khuôn mặt không
+    if (!faceImage) {
+      console.log("❌ No face image provided");
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Thiếu ảnh khuôn mặt để xác thực' 
+      });
+    }
+    
+    // LUÔN LUÔN TRUE nếu có ảnh (để test)
     const faceVerified = true;
+    
+    console.log(`✅ Face verified set to: ${faceVerified}`);
+    console.log(`🚀 Calling attendanceService.processFaceAuth with verified=${faceVerified}`);
     
     // Xử lý xác thực khuôn mặt và check-in/check-out qua service
     const { attendance, action, user } = await attendanceService.processFaceAuth(userId, faceVerified);
     
+    console.log(`✅ Service returned: action=${action}, user=${user.name}`);
+    
     // Gửi thông báo qua Socket.IO
     if (io) {
-      io.emit('attendance_update', {
+      const socketData = {
         userId: user.id,
         userName: user.name,
         action,
         time: action === 'check-in' ? attendance.checkInTime : attendance.checkOutTime
-      });
+      };
+      
+      io.emit('attendance_update', socketData);
+      console.log(`📡 Emitted attendance_update:`, socketData);
+      const mqttResponse = {
+        status: 'success',
+        user: user.name,
+        userId: user.id,
+        action: action,
+        message: `${action === 'check-in' ? 'Check-in' : 'Check-out'} thành công`,
+        timestamp: new Date().toISOString()
+      };
+      
+      // TODO: Gửi về ESP32 qua MQTT
+      // Cần import MQTT client hoặc dùng global instance
+      console.log(`📤 Should send to ESP32:`, mqttResponse);
+      mqttClient.publish('library/response', JSON.stringify(mqttResponse));
     }
     
-    res.status(200).json({
+    const responseData = {
       success: true,
       message: `${action === 'check-in' ? 'Check-in' : 'Check-out'} thành công`,
       attendance,
       action
-    });
+    };
+    
+    console.log(`📤 Sending response:`, responseData);
+    console.log("🔥 === FACE AUTH DEBUG END SUCCESS ===");
+    
+    res.status(200).json(responseData);
     
   } catch (error) {
-    console.error('Lỗi khi xử lý xác thực khuôn mặt:', error);
+    console.log("🔥 === FACE AUTH DEBUG END ERROR ===");
+    console.error('❌ Full error object:', error);
+    console.error('❌ Error message:', error.message);
+    console.error('❌ Error stack:', error.stack);
     
     if (error.message === 'Xác thực khuôn mặt thất bại') {
       return res.status(401).json({ 

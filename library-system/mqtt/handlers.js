@@ -61,23 +61,23 @@ async function handleCardScan(message, io) {
       cardId
     });
     
-    // Tạo response thành công để gửi về ESP32
-    const response = {
-      status: 'success',
-      user: user.name,
-      userId: user.id,
-      action: 'check-in', // hoặc logic phức tạp hơn để xác định check-in/out
-      scanType: scanType,
-      message: 'User found successfully'
-    };
+    // // Tạo response thành công để gửi về ESP32
+    // const response = {
+    //   status: 'success',
+    //   user: user.name,
+    //   userId: user.id,
+    //   action: 'check-in', // hoặc logic phức tạp hơn để xác định check-in/out
+    //   scanType: scanType,
+    //   message: 'User found successfully'
+    // };
     
-    // Gửi response về ESP32 qua MQTT
-    if (mqttClient) {
-      mqttClient.publish('library/response', JSON.stringify(response));
-      console.log(`📤 Đã gửi response về ESP32:`, response);
-    } else {
-      console.log(`⚠️ MQTT client chưa được set, không thể gửi response về ESP32`);
-    }
+    // // Gửi response về ESP32 qua MQTT
+    // if (mqttClient) {
+    //   mqttClient.publish('library/response', JSON.stringify(response));
+    //   console.log(`📤 Đã gửi response về ESP32:`, response);
+    // } else {
+    //   console.log(`⚠️ MQTT client chưa được set, không thể gửi response về ESP32`);
+    // }
     
     // Gửi thông báo qua Socket.IO cho frontend
     io.emit(CARD_SCANNED, { 

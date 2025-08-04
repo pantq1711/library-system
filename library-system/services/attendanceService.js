@@ -97,18 +97,34 @@ const processCardScan = async (cardId) => {
  * @param {boolean} faceVerified - Kết quả xác thực khuôn mặt
  * @returns {Promise<Object>} Kết quả check-in/check-out
  */
-const processFaceAuth = async (userId, faceVerified = true) => {
+// TRONG FILE: library-system/services/attendanceService.js  
+// TÌM FUNCTION processFaceAuth VÀ SỬA:
+
+// SỬA FUNCTION processFaceAuth trong attendanceService.js:
+
+const processFaceAuth = async (userId, faceVerified = false) => {
+  console.log("🔥 === SERVICE FACE AUTH DEBUG START ===");
+  console.log(`🆔 User ID: ${userId}`);
+  console.log(`✅ Face verified parameter: ${faceVerified}`);
+  console.log(`📝 Face verified type: ${typeof faceVerified}`);
+  
   try {
     // Kiểm tra xem người dùng có tồn tại không
     const user = await User.findByPk(userId);
     if (!user) {
+      console.log(`❌ User not found with ID: ${userId}`);
       throw new Error('Không tìm thấy người dùng');
     }
     
-    // Nếu xác thực khuôn mặt thất bại
+    console.log(`👤 Found user: ${user.name} (ID: ${user.id})`);
+    
+    // Kiểm tra xác thực khuôn mặt
     if (!faceVerified) {
+      console.log(`❌ Face verification failed - faceVerified is: ${faceVerified}`);
       throw new Error('Xác thực khuôn mặt thất bại');
     }
+    
+    console.log(`✅ Face verification successful - proceeding with attendance`);
     
     // Kiểm tra xem người dùng đã check-in chưa
     const lastAttendance = await Attendance.findOne({
@@ -116,11 +132,14 @@ const processFaceAuth = async (userId, faceVerified = true) => {
       order: [['createdAt', 'DESC']]
     });
     
+    console.log(`🔍 Last attendance record:`, lastAttendance ? `Found (ID: ${lastAttendance.id})` : 'None');
+    
     let attendance;
     let action;
     
     if (lastAttendance) {
       // Người dùng đã check-in, thực hiện check-out
+      console.log(`🚪 User already checked in, performing check-out`);
       attendance = await lastAttendance.update({
         checkOutTime: new Date(),
         status: 'check-out',
@@ -130,6 +149,7 @@ const processFaceAuth = async (userId, faceVerified = true) => {
       action = 'check-out';
     } else {
       // Người dùng chưa check-in, thực hiện check-in
+      console.log(`🚪 User not checked in, performing check-in`);
       attendance = await Attendance.create({
         userId,
         checkInTime: new Date(),
@@ -140,12 +160,19 @@ const processFaceAuth = async (userId, faceVerified = true) => {
       action = 'check-in';
     }
     
+    console.log(`📝 Attendance ${action} completed successfully`);
+    console.log(`📊 Attendance record ID: ${attendance.id}`);
+    console.log("🔥 === SERVICE FACE AUTH DEBUG END SUCCESS ===");
+    
     return {
       attendance,
       action,
       user
     };
   } catch (error) {
+    console.log("🔥 === SERVICE FACE AUTH DEBUG END ERROR ===");
+    console.error(`❌ Service error:`, error.message);
+    console.error(`❌ Full error:`, error);
     throw new Error(`Lỗi khi xử lý xác thực khuôn mặt: ${error.message}`);
   }
 };
