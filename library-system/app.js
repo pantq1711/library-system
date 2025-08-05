@@ -81,7 +81,7 @@ const PORT = process.env.PORT || 3000;
 // Khởi động server
 server.listen(PORT, () => {
   console.log(`Server đang chạy trên port ${PORT}`);
-});
+}); 
 
 // Xuất các đối tượng cần thiết
 module.exports = { app, io }; //mqttClient 

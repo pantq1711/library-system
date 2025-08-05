@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import socket from "../socket";
 import "../styles/CheckInOut.css";
+import CheckInList from './CheckInList';
+
 
 function CheckInOut() {
   // States
@@ -359,7 +361,7 @@ function CheckInOut() {
           </button>
         </div>
       )}
-
+<CheckInList />
       {/* Debug Info */}
       <div className="debug-info" style={{ marginTop: "20px", fontSize: "12px", color: "#666" }}>
         <p>🔌 Socket: {socket.connected ? "Connected" : "Disconnected"}</p>

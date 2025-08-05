@@ -25,7 +25,8 @@
     "multer": "^2.0.2",
     "mysql2": "^3.13.0",
     "sequelize": "^6.37.6",
-    "socket.io": "^4.8.1"
+    "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.0"
