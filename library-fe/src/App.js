@@ -18,7 +18,7 @@ import DeviceManagement from "./components/DeviceManagement";
 import "./App.css"; // Import file CSS
 import logo from "./images/logo.png"; // Import logo
 import profileIcon from "./images/profile-icon.png"; // Import ảnh profile
-
+import UserProfile from './components/UserProfile';
 
 
 
@@ -56,6 +56,7 @@ function App() {
           <Route path="/books/update/:id" element={<BookUpdate />} />
           <Route path="/add-book" element={<AddBook />} />
           <Route path="/add-book-rfid" element={<AddBookRFID />} />
+          <Route path="/profile" element={<UserProfile />} />
           <Route path="/borrow" element={<BorrowBook />} />
           <Route path="/return" element={<ReturnBook />} />
           <Route path="/members" element={<MemberList />} />

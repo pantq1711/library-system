@@ -1,3 +1,4 @@
+// library-fe/src/components/BorrowBook.js (FIXED VERSION)
 import React, { useState, useEffect } from "react";
 import socket from "../socket";
 import "../styles/BorrowBook.css";
@@ -14,35 +15,59 @@ const BorrowBook = () => {
     socket.on("card_scanned", async (data) => {
       console.log("📱 Card scanned:", data);
       
-      if (data.scanType === 'loan') {
-        // Verify user đã check-in chưa
-        setLoading(true);
-        try {
-          const response = await fetch(`http://localhost:5000/api/attendance/verify-checkin/${data.userId}`);
-          const result = await response.json();
-          console.log('📩 Response from verify-checkin:', result); // ⬅️ DÒNG CẦN ĐẶT ĐÂY
-
-          if (result.isCheckedIn) {
-            setUserCard({
-              cardId: data.cardId,
-              user: {
-                id: data.userId,
-                name: data.userName,
-                role: data.userRole
-              }
-            });
-            setIsCheckedIn(true);
-            setMessage(`Xin chào ${data.userName}! Vui lòng quét sách cần mượn.`);
-          } else {
-            setMessage("Vui lòng check-in trước khi mượn sách!");
-            setIsCheckedIn(false);
-          }
-        } catch (error) {
-          console.error("Error verifying check-in:", error);
-          setMessage("Lỗi kiểm tra trạng thái check-in!");
-        } finally {
+      // ✅ FIX: Chỉ xử lý khi có scanType là 'loan' hoặc không có scanType
+      if (data.scanType && data.scanType !== 'loan') {
+        console.log("⚠️ Skipping non-loan scan type in BorrowBook component");
+        return;
+      }
+      
+      // Verify user đã check-in chưa
+      setLoading(true);
+      try {
+        // ✅ FIX: Lấy userId từ data đúng cách
+        const userId = data.userId || data.user?.id;
+        
+        if (!userId) {
+          setMessage("Không tìm thấy thông tin người dùng từ thẻ!");
           setLoading(false);
+          return;
         }
+
+        console.log(`📋 Verifying check-in for user ID: ${userId}`);
+
+        const response = await fetch(`http://localhost:5000/api/attendance/verify-checkin/${userId}`);
+        const result = await response.json();
+        
+        console.log('📩 Response from verify-checkin:', result);
+
+        if (result.success && result.isCheckedIn) {
+          setUserCard({
+            cardId: data.cardId,
+            user: {
+              id: userId,
+              name: data.userName || data.user?.name,
+              role: data.userRole || data.user?.role || 'member'
+            }
+          });
+          setIsCheckedIn(true);
+          setMessage(`Xin chào ${data.userName || data.user?.name}! Vui lòng quét sách cần mượn.`);
+        } else {
+          setUserCard({
+            cardId: data.cardId,
+            user: {
+              id: userId,
+              name: data.userName || data.user?.name,
+              role: data.userRole || data.user?.role || 'member'
+            }
+          });
+          setIsCheckedIn(false);
+          setMessage("⚠️ Vui lòng check-in trước khi mượn sách! Hãy đến khu vực Check-in/Check-out để điểm danh.");
+        }
+      } catch (error) {
+        console.error("Error verifying check-in:", error);
+        setMessage("❌ Lỗi kiểm tra trạng thái check-in! Vui lòng thử lại.");
+      } finally {
+        setLoading(false);
       }
     });
 
@@ -60,12 +85,14 @@ const BorrowBook = () => {
             rfidTag: data.rfidTag,
             available: data.available
           }]);
-          setMessage(`Đã thêm: ${data.book}`);
+          setMessage(`✅ Đã thêm: ${data.book}`);
         } else {
-          setMessage("Sách này đã được quét!");
+          setMessage("⚠️ Sách này đã được quét!");
         }
+      } else if (userCard && !isCheckedIn) {
+        setMessage("❌ Vui lòng check-in trước khi mượn sách!");
       } else {
-        setMessage("Vui lòng quét thẻ thành viên trước!");
+        setMessage("❌ Vui lòng quét thẻ thành viên trước!");
       }
     });
 
@@ -78,6 +105,11 @@ const BorrowBook = () => {
   const handleCompleteBorrow = async () => {
     if (!userCard || borrowedBooks.length === 0) {
       alert("Vui lòng quét thẻ và ít nhất một cuốn sách!");
+      return;
+    }
+
+    if (!isCheckedIn) {
+      alert("Vui lòng check-in trước khi mượn sách!");
       return;
     }
 
@@ -98,9 +130,9 @@ const BorrowBook = () => {
 
       if (response.ok) {
         const result = await response.json();
-        // console.log('📩 Response from verify-checkin:', result);
+        console.log('📋 Borrow response:', result);
 
-        setMessage("Mượn sách thành công!");
+        setMessage("✅ Mượn sách thành công!");
         
         // Reset sau 3 giây
         setTimeout(() => {
@@ -111,11 +143,11 @@ const BorrowBook = () => {
         }, 3000);
       } else {
         const error = await response.json();
-        alert(error.message || "Mượn sách thất bại!");
+        alert(`❌ Lỗi: ${error.message || "Mượn sách thất bại!"}`);
       }
     } catch (error) {
       console.error("Error:", error);
-      alert("Có lỗi xảy ra khi mượn sách!");
+      alert("❌ Có lỗi xảy ra khi mượn sách!");
     } finally {
       setLoading(false);
     }
@@ -123,6 +155,14 @@ const BorrowBook = () => {
 
   const removeBook = (bookId) => {
     setBorrowedBooks(prev => prev.filter(b => b.id !== bookId));
+    setMessage("📚 Đã xóa sách khỏi danh sách mượn");
+  };
+
+  const resetSession = () => {
+    setUserCard(null);
+    setBorrowedBooks([]);
+    setMessage("");
+    setIsCheckedIn(false);
   };
 
   return (
@@ -137,32 +177,48 @@ const BorrowBook = () => {
 
       {/* Message */}
       {message && (
-        <div className={`message ${message.includes('Lỗi') ? 'error' : 'success'}`}>
+        <div className={`message ${message.includes('Lỗi') || message.includes('❌') || message.includes('⚠️') ? 'error' : 'success'}`}>
           {message}
         </div>
       )}
 
       {/* User Info */}
       <div className="user-section">
-        <h3>Thông tin người mượn:</h3>
+        <h3>👤 Thông tin người mượn:</h3>
         {userCard ? (
           <div className="user-info">
             <p><strong>Họ tên:</strong> {userCard.user.name}</p>
             <p><strong>Vai trò:</strong> {userCard.user.role}</p>
+            <p><strong>Card ID:</strong> {userCard.cardId}</p>
             <p><strong>Trạng thái:</strong> 
               <span className={isCheckedIn ? 'checked-in' : 'not-checked-in'}>
-                {isCheckedIn ? ' ✅ Đã check-in' : ' ❌ Chưa check-in'}
+                {isCheckedIn ? ' ✅ Đã check-in - Có thể mượn sách' : ' ❌ Chưa check-in - Cần check-in trước'}
               </span>
             </p>
+            {!isCheckedIn && (
+              <div className="warning-box">
+                <p>⚠️ <strong>Lưu ý:</strong> Bạn cần check-in tại khu vực "Check-in/Check-out" trước khi mượn sách.</p>
+              </div>
+            )}
           </div>
         ) : (
-          <p className="instruction">Vui lòng quét thẻ thành viên để bắt đầu...</p>
+          <p className="instruction">🏷️ Vui lòng quét thẻ thành viên để bắt đầu...</p>
+        )}
+        
+        {userCard && (
+          <button 
+            className="btn btn-reset"
+            onClick={resetSession}
+            style={{ marginTop: '10px' }}
+          >
+            🔄 Đổi người mượn
+          </button>
         )}
       </div>
 
       {/* Books List */}
       <div className="books-section">
-        <h3>Sách đã quét:</h3>
+        <h3>📖 Sách đã quét:</h3>
         {borrowedBooks.length > 0 ? (
           <div className="books-list">
             {borrowedBooks.map((book, index) => (
@@ -185,19 +241,46 @@ const BorrowBook = () => {
             ))}
           </div>
         ) : (
-          <p className="instruction">Chưa có sách nào được quét.</p>
+          <p className="instruction">
+            {userCard && isCheckedIn 
+              ? "📚 Chưa có sách nào được quét. Hãy quét sách muốn mượn."
+              : "⚠️ Vui lòng quét thẻ và check-in trước."
+            }
+          </p>
         )}
       </div>
 
       {/* Action Button */}
-      {borrowedBooks.length > 0 && (
+      {borrowedBooks.length > 0 && isCheckedIn && (
         <button 
           className="complete-btn"
           onClick={handleCompleteBorrow}
           disabled={loading}
         >
-          {loading ? 'Đang xử lý...' : '✅ Hoàn tất mượn sách'}
+          {loading ? '⏳ Đang xử lý...' : `✅ Hoàn tất mượn ${borrowedBooks.length} cuốn sách`}
         </button>
+      )}
+
+      {/* Instructions */}
+      {!userCard && (
+        <div className="instructions">
+          <h3>📋 Hướng dẫn mượn sách:</h3>
+          <ol>
+            <li>🏷️ <strong>Check-in:</strong> Đến khu vực "Check-in/Check-out" để điểm danh</li>
+            <li>📱 <strong>Quét thẻ:</strong> Quét thẻ thành viên tại khu vực mượn sách</li>
+            <li>📚 <strong>Quét sách:</strong> Quét từng cuốn sách muốn mượn</li>
+            <li>✅ <strong>Hoàn tất:</strong> Nhấn "Hoàn tất mượn sách"</li>
+          </ol>
+          
+          <div className="note">
+            <p><strong>📝 Lưu ý quan trọng:</strong></p>
+            <ul>
+              <li>Bạn <strong>phải check-in</strong> trước khi mượn sách</li>
+              <li>Mỗi lần chỉ được mượn tối đa 5 cuốn sách</li>
+              <li>Thời hạn mượn là 14 ngày</li>
+            </ul>
+          </div>
+        </div>
       )}
 
       <style jsx>{`
@@ -247,7 +330,7 @@ const BorrowBook = () => {
           border: 1px solid #f5c6cb;
         }
 
-        .user-section, .books-section {
+        .user-section, .books-section, .instructions {
           background: white;
           padding: 20px;
           border-radius: 8px;
@@ -261,10 +344,20 @@ const BorrowBook = () => {
 
         .checked-in {
           color: #28a745;
+          font-weight: bold;
         }
 
         .not-checked-in {
           color: #dc3545;
+          font-weight: bold;
+        }
+
+        .warning-box {
+          background: #fff3cd;
+          border: 1px solid #ffeaa7;
+          padding: 10px;
+          border-radius: 4px;
+          margin-top: 10px;
         }
 
         .instruction {
@@ -311,12 +404,13 @@ const BorrowBook = () => {
           color: #dc3545;
         }
 
-        .remove-btn {
+        .remove-btn, .btn-reset {
           background: none;
-          border: none;
+          border: 1px solid #ccc;
           cursor: pointer;
-          font-size: 16px;
-          padding: 5px;
+          font-size: 14px;
+          padding: 5px 10px;
+          border-radius: 4px;
         }
 
         .complete-btn {
@@ -338,6 +432,13 @@ const BorrowBook = () => {
         .complete-btn:disabled {
           background-color: #6c757d;
           cursor: not-allowed;
+        }
+
+        .note {
+          background: #e9ecef;
+          padding: 15px;
+          border-radius: 4px;
+          margin-top: 15px;
         }
       `}</style>
     </div>

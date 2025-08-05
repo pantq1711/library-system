@@ -1,0 +1,254 @@
+/* library-fe/src/styles/UserProfile.css */
+.user-profile {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .user-profile h2 {
+    color: #2c5234;
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 28px;
+  }
+  
+  .user-profile h3 {
+    color: #2c5234;
+    border-bottom: 2px solid #4CAF50;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+  }
+  
+  /* User Info Section */
+  .user-info-section {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 30px;
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  .user-info-section p {
+    margin: 10px 0;
+    font-size: 16px;
+  }
+  
+  .user-info-section strong {
+    color: #2c5234;
+    min-width: 100px;
+    display: inline-block;
+  }
+  
+  /* Face Registration Section */
+  .face-registration-section {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  .status-message {
+    background: #e8f5e8;
+    border: 1px solid #4CAF50;
+    border-radius: 5px;
+    padding: 10px;
+    margin: 15px 0;
+    text-align: center;
+    font-weight: bold;
+  }
+  
+  .status-message:contains("❌") {
+    background: #ffe8e8;
+    border-color: #f44336;
+    color: #d32f2f;
+  }
+  
+  /* Camera Controls */
+  .camera-controls {
+    text-align: center;
+    margin: 20px 0;
+  }
+  
+  .camera-actions {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+  }
+  
+  .btn-camera,
+  .btn-capture,
+  .btn-stop,
+  .btn-register {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .btn-camera {
+    background: #4CAF50;
+    color: white;
+  }
+  
+  .btn-camera:hover {
+    background: #45a049;
+    transform: translateY(-2px);
+  }
+  
+  .btn-capture {
+    background: #2196F3;
+    color: white;
+  }
+  
+  .btn-capture:hover {
+    background: #1976D2;
+  }
+  
+  .btn-stop {
+    background: #f44336;
+    color: white;
+  }
+  
+  .btn-stop:hover {
+    background: #d32f2f;
+  }
+  
+  .btn-register {
+    background: #FF9800;
+    color: white;
+    width: 100%;
+    margin-top: 20px;
+    font-size: 18px;
+    padding: 15px;
+  }
+  
+  .btn-register:hover:not(:disabled) {
+    background: #F57C00;
+    transform: translateY(-2px);
+  }
+  
+  .btn-register:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    transform: none;
+  }
+  
+  /* Camera Preview */
+  .camera-preview {
+    text-align: center;
+    margin: 20px 0;
+  }
+  
+  .video-preview {
+    width: 100%;
+    max-width: 400px;
+    height: auto;
+    border: 3px solid #4CAF50;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  /* File Upload */
+  .file-upload {
+    text-align: center;
+    margin: 20px 0;
+  }
+  
+  .upload-label {
+    display: inline-block;
+    padding: 12px 24px;
+    background: #673AB7;
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+  }
+  
+  .upload-label:hover {
+    background: #5E35B1;
+    transform: translateY(-2px);
+  }
+  
+  .file-input {
+    display: none;
+  }
+  
+  /* Photo Preview */
+  .photo-preview {
+    text-align: center;
+    margin: 20px 0;
+    padding: 20px;
+    background: #f5f5f5;
+    border-radius: 8px;
+    border: 2px dashed #4CAF50;
+  }
+  
+  .photo-preview h4 {
+    color: #2c5234;
+    margin-bottom: 15px;
+  }
+  
+  .preview-image {
+    max-width: 300px;
+    max-height: 300px;
+    border: 3px solid #4CAF50;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .user-profile {
+      margin: 10px;
+      padding: 15px;
+    }
+    
+    .camera-actions {
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    .video-preview {
+      max-width: 100%;
+    }
+    
+    .preview-image {
+      max-width: 100%;
+    }
+  }
+  
+  /* Animations */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  .face-registration-section,
+  .user-info-section {
+    animation: fadeIn 0.5s ease-out;
+  }
+  
+  /* Loading spinner for buttons */
+  .btn-register:disabled::before {
+    content: '';
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+    border: 2px solid #fff;
+    border-top: 2px solid transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }

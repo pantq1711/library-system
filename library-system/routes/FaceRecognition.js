@@ -191,7 +191,7 @@ router.get('/status/:userId',  async (req, res) => {
     const userId = req.params.userId;
     
     // Lấy trạng thái đăng ký khuôn mặt
-    const result = await faceRecognitionService.getFaceStatus(userId);
+    const result = await faceRecognitionService.getFaceRegistrationStatus(userId);
     
     if (result.success) {
       res.status(200).json(result);
